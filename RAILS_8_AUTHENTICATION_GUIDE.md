@@ -1,78 +1,67 @@
-# Rails 8 Authentication Guide - 2024/2025 Best Practices
+# Rails 8 Authentication Guide - For Autonomous Agents
 
 ## Overview
 
-Rails 8's built-in auth generator provides a secure foundation. This guide covers verified 2024-2025 implementation best practices.
+Rails 8 includes authentication generator. This guide shows complete, working code for agents unfamiliar with Rails conventions.
 
 ## Prerequisites
 
 ```bash
 rails --version  # Requires Rails 8.0.0+
-gem 'bcrypt', '~> 3.1.7'  # Add to Gemfile
+# Ensure gem 'bcrypt', '~> 3.1.7' is in Gemfile
 ```
 
-## What's Generated vs What You Must Add
+## Generated vs Manual
 
-| Feature | Generated? | Notes |
-|---------|-----------|-------|
-| User/Session models, Login/Logout | ✅ Yes | `has_secure_password`, controllers, views |
-| Password Reset, Rate Limiting | ✅ Yes | 15-min tokens, IP-based (10/3min) |
-| Authentication Concern | ✅ Yes | `Current.user`, `start_new_session_for` |
-| **Registration** | ❌ **NO** | Create RegistrationsController manually |
-| **Validations** | ❌ **NO** | Add email/password validation yourself |
-| **Account Lockout, 2FA, OAuth** | ❌ **NO** | Manual implementation required |
+| Auto-Generated ✅ | Must Create Manually ❌ |
+|-------------------|-------------------------|
+| User/Session models, Login/Logout | User registration (controller + view + route) |
+| Password reset (15min tokens) | Email/password validations in User model |
+| Rate limiting (10/3min) | Session expiration config |
 
-**Key Insight**: Rails 8 provides a foundation. You must add registration, validations, security features.
-
-## Step 1: Generate & Migrate
+## Step 1: Generate Authentication System
 
 ```bash
-bin/rails generate authentication && bin/rails db:migrate
+bin/rails generate authentication
+bin/rails db:migrate
 ```
 
-Creates User/Session models, controllers, views, migrations.
+Creates User/Session models, SessionsController, PasswordsController, Authentication concern.
 
-## Step 2: Understanding Generated Models
+## Step 2: Complete User Model (Add Validations)
 
-**✅ User Model (Generated):**
+**REPLACE `app/models/user.rb` with this complete version:**
+
 ```ruby
 class User < ApplicationRecord
-  has_secure_password  # BCrypt hashing, password/password_confirmation
+  has_secure_password  # BCrypt hashing, creates password= and password_confirmation=
   has_many :sessions, dependent: :destroy
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+
+  # NOT generated - you must add these:
+  validates :email_address, presence: true, uniqueness: true
+  validates :password,
+    length: { minimum: 12 },
+    format: { with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+              message: "needs upper/lower/number" },
+    allow_nil: true  # Only validates on password change
 end
 ```
 
-**➕ Add Validations (Recommended):**
-```ruby
-validates :email_address, presence: true, uniqueness: true
-validates :password, length: { minimum: 12 }, allow_nil: true
-```
+## Step 3: Create User Registration (REQUIRED)
 
-**✅ Session Model (Generated):**
-```ruby
-class Session < ApplicationRecord
-  belongs_to :user
-  # Token auto-generated via migration's token:token type (has_secure_token)
-  # Tracks ip_address and user_agent for security
-end
-```
-
-## Step 3: Add User Registration (Required)
-
-**⚠️ Not Generated - Must Create Manually:**
+**CREATE `app/controllers/registrations_controller.rb`:**
 
 ```ruby
-# app/controllers/registrations_controller.rb
 class RegistrationsController < ApplicationController
-  allow_unauthenticated_access only: [:new, :create]
+  allow_unauthenticated_access only: [:new, :create]  # From Authentication concern
 
   def new; @user = User.new; end
 
   def create
     @user = User.new(user_params)
     if @user.save
-      start_new_session_for @user  # Helper from Authentication concern
+      start_new_session_for @user  # From Authentication concern - creates session + cookie
       redirect_to root_path, notice: "Welcome!"
     else
       render :new, status: :unprocessable_entity
@@ -86,80 +75,89 @@ class RegistrationsController < ApplicationController
 end
 ```
 
-**Routes:** `resource :registration, only: [:new, :create]`
+**ADD to `config/routes.rb` inside `Rails.application.routes.draw do` block:**
 
-**View:** Standard form_with for email_address, password, password_confirmation fields.
-
-## Step 4: Strengthen Security (Production)
-
-**Password Complexity:**
 ```ruby
-# app/models/user.rb
-validates :password, length: { minimum: 12 },
-  format: { with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-            message: "needs upper/lower/number" }, allow_nil: true
+Rails.application.routes.draw do
+  resource :registration, only: [:new, :create]  # ADD THIS LINE
+  # ... other routes ...
+end
 ```
 
-**Session Config (config/initializers/session_store.rb):**
+**CREATE `app/views/registrations/new.html.erb`:**
+
+```erb
+<h1>Sign Up</h1>
+<%= form_with model: @user, url: registration_path do |f| %>
+  <%= f.email_field :email_address, required: true, placeholder: "Email" %>
+  <%= f.password_field :password, required: true, placeholder: "Password (12+ chars)" %>
+  <%= f.password_field :password_confirmation, required: true, placeholder: "Confirm" %>
+  <%= f.submit "Sign Up" %>
+<% end %>
+```
+
+## Step 4: Configure Session Security (Production)
+
+**CREATE `config/initializers/session_store.rb`:**
+
 ```ruby
 Rails.application.config.session_store :cookie_store,
-  expire_after: 12.hours, secure: Rails.env.production?,
-  httponly: true, same_site: :lax
+  expire_after: 12.hours,        # Sessions expire after 12 hours
+  secure: Rails.env.production?, # HTTPS-only in production
+  httponly: true,                # JavaScript cannot access (XSS protection)
+  same_site: :lax                # CSRF protection
 ```
 
-**Force SSL (config/environments/production.rb):**
-```ruby
-config.force_ssl = true
-```
-
-## Step 5: Optional Enhancements
-
-**Account Lockout:**
-```bash
-rails g migration AddLockableToUsers failed_attempts:integer locked_at:datetime
-# Then add to User: def locked?; locked_at.present? && locked_at > 1.hour.ago; end
-```
-
-**Email Verification:**
-```bash
-rails g migration AddConfirmationToUsers email_confirmed_at:datetime
-```
-
-## Critical Misconceptions
-
-1. **Registration is included** → NO. Only login/logout generated.
-2. **Password/email validations exist** → NO. Add manually.
-3. **Sessions auto-expire** → NO. Configure timeout yourself.
-
-Generator creates login + password reset. Everything else is YOUR responsibility.
-
-## Password Reset (Included)
+**EDIT `config/environments/production.rb` - add this line:**
 
 ```ruby
-user.password_reset_token  # 15-min signed token, no DB storage
-User.find_by_password_reset_token(token)  # Verify & find user
+config.force_ssl = true  # Force HTTPS in production
+```
+
+## Step 5: Optional - Account Lockout
+
+```bash
+rails generate migration AddLockableToUsers failed_attempts:integer locked_at:datetime
+rails db:migrate  # Don't forget to run migration!
+```
+
+**ADD to User model:**
+
+```ruby
+def locked?
+  locked_at.present? && locked_at > 1.hour.ago
+end
+```
+
+## What's NOT Generated (Must Add Manually)
+
+1. Registration controller + view + route
+2. Email uniqueness + password complexity validations
+3. Session expiration configuration
+
+## Key Generated Methods (Available in Controllers)
+
+```ruby
+Current.user                              # Returns current User or nil
+start_new_session_for(user)              # Creates session + cookie
+user.password_reset_token                # Generates 15-min token
+User.find_by_password_reset_token(token) # Validates token, returns user
 ```
 
 ## Production Checklist
 
-- [ ] Force SSL + secure session cookies configured
-- [ ] Email/password validations added to User model
-- [ ] Registration controller created & tested
-- [ ] Rate limiting verified, CSRF protection enabled
-- [ ] Optional: email verification, 2FA, account lockout
+- [ ] User model has email uniqueness + password complexity validations
+- [ ] RegistrationsController created with route
+- [ ] Session store configured with expiration + security flags
+- [ ] Force SSL enabled in production.rb
+- [ ] CSRF protection NOT disabled (enabled by default)
 
-## Common Pitfalls
+## Common Mistakes
 
-1. Assuming validations exist (they don't - add manually)
-2. Skipping email uniqueness validation (allows duplicate accounts)
-3. Not configuring session expiration (sessions last forever)
-
-## Resources
-
-- [Rails Security Guide](https://guides.rubyonrails.org/security.html)
-- [Rails 8 Auth Generator](https://blog.saeloun.com/2025/05/12/rails-8-adds-built-in-authentication-generator/)
-- [OWASP Auth Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+1. **Forgetting to add validations** - User model has NO validations by default
+2. **Not running db:migrate** - After generate commands, always migrate
+3. **Incomplete User model** - Don't use code snippets, use the complete class above
 
 ---
 
-**Last Updated**: November 2025 | Rails 8.0+ | Verified against generator source code
+**For Autonomous Agents**: This guide provides complete, copy-paste-ready code. All file paths are explicit. All Rails DSL methods are explained in comments.

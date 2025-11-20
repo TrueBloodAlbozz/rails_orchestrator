@@ -26,11 +26,13 @@ bin/rails generate authentication
 bin/rails db:migrate
 ```
 
-Creates User/Session models, SessionsController, PasswordsController, Authentication concern.
+**Creates:** User/Session models (with `password_digest` ✅), SessionsController, PasswordsController, Authentication concern (`start_new_session_for`, `Current.user`), views.
+
+**⚠️ Working code but NO validations!**
 
 ## Step 2: Complete User Model (Add Validations)
 
-**REPLACE `app/models/user.rb` with this complete version:**
+**⚠️ REPLACE entire file `app/models/user.rb` (don't edit, replace):**
 
 ```ruby
 class User < ApplicationRecord
@@ -112,20 +114,16 @@ Rails.application.config.session_store :cookie_store,
 config.force_ssl = true  # Force HTTPS in production
 ```
 
-## Step 5: Optional - Account Lockout
+## Step 5: OPTIONAL - Account Lockout
+
+**Not required. Only if needed.**
 
 ```bash
-rails generate migration AddLockableToUsers failed_attempts:integer locked_at:datetime
-rails db:migrate  # Don't forget to run migration!
+rails g migration AddLockableToUsers failed_attempts:integer locked_at:datetime
+rails db:migrate
 ```
 
-**ADD to User model:**
-
-```ruby
-def locked?
-  locked_at.present? && locked_at > 1.hour.ago
-end
-```
+Add to User: `def locked?; locked_at.present? && locked_at > 1.hour.ago; end`
 
 ## Key Generated Methods (Available in Controllers)
 
@@ -138,23 +136,25 @@ User.find_by_password_reset_token(token) # Validates token, returns user
 
 ## Production Checklist
 
-- [ ] Email uniqueness + password validations in User model
-- [ ] RegistrationsController + route + view created
-- [ ] Session expiration + security flags configured
-- [ ] Force SSL enabled, CSRF protection kept
+- [ ] User validations (email uniqueness + password complexity)
+- [ ] Registration (controller + route + view)
+- [ ] Session security (expiration + SSL + CSRF)
 
 ## Common Mistakes
 
-1. **Forgetting to add validations** - User model has NO validations by default
-2. **Not running db:migrate** - After generate commands, always migrate
-3. **Incomplete User model** - Don't use code snippets, use the complete class above
+1. Forgetting validations (User has NONE by default)
+2. Not running db:migrate after generator
+3. Using code snippets instead of complete class (Step 2)
 
-## 🐛 Implementation Errors (Agent Traps)
+## 🐛 Errors (Only if Ignoring Guide)
 
-**Database:** Column must be `password_digest` NOT `password` ❌
-**Model:** Don't add `attr_accessor :password` - has_secure_password provides it ❌
-**Authenticate:** `undefined method` = forgot `has_secure_password` ❌
-**Forms:** Empty password_confirmation sends `""` not `nil` (always validates) ❌
+**Following Steps 1-4 = NO errors. These happen when improvising:**
+- Manual `password` column (need `password_digest`) ❌
+- Adding `attr_accessor :password` (duplicate) ❌
+- Forgetting `has_secure_password` ❌
+- Empty password_confirmation = `""` not `nil` ❌
+
+**ONE path. Don't improvise.**
 
 ## ⚠️ Password Security Anti-Patterns
 
@@ -168,4 +168,10 @@ User.find_by_password_reset_token(token) # Validates token, returns user
 
 ---
 
-**For Autonomous Agents**: This guide provides complete, copy-paste-ready code. All file paths are explicit. All Rails DSL methods are explained in comments.
+## 🎯 ONE Path Strategy
+
+**Follow Steps 1-4 sequentially. NO alternatives. Don't improvise.**
+
+Generator (Step 1) → Validations (Step 2) → Registration (Step 3) → Security (Step 4)
+
+**For Agents**: Copy-paste ready. Explicit paths. Explained DSL.

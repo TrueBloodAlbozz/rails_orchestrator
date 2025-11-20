@@ -149,6 +149,13 @@ User.find_by_password_reset_token(token) # Validates token, returns user
 2. **Not running db:migrate** - After generate commands, always migrate
 3. **Incomplete User model** - Don't use code snippets, use the complete class above
 
+## 🐛 Implementation Errors (Agent Traps)
+
+**Database:** Column must be `password_digest` NOT `password` ❌
+**Model:** Don't add `attr_accessor :password` - has_secure_password provides it ❌
+**Authenticate:** `undefined method` = forgot `has_secure_password` ❌
+**Forms:** Empty password_confirmation sends `""` not `nil` (always validates) ❌
+
 ## ⚠️ Password Security Anti-Patterns
 
 **DON'T use for passwords** (common agent mistake: "encrypt password" → wrong tool):

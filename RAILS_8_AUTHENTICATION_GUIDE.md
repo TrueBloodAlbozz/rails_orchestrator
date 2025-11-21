@@ -42,7 +42,7 @@ validates :password, length: { minimum: 12 },
   allow_nil: true
 ```
 
-**Result:** User model now has has_secure_password (from generator) + validations (you added).
+**Result:** User model now has `has_secure_password` (from generator) + validations (you added).
 
 ## Step 3: Create User Registration (REQUIRED)
 

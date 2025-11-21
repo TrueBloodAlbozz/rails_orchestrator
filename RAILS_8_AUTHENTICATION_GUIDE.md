@@ -111,23 +111,6 @@ Rails.application.config.session_store :cookie_store,
 config.force_ssl = true  # Force HTTPS in production
 ```
 
-## Step 5: OPTIONAL - Account Lockout
-
-**⚠️ SKIP this unless you specifically need account lockout. Steps 1-4 are complete auth.**
-
-```bash
-rails g migration AddLockableToUsers failed_attempts:integer locked_at:datetime
-rails db:migrate
-```
-
-**ADD to User model (inside class, after validations):**
-
-```ruby
-def locked?
-  locked_at.present? && locked_at > 1.hour.ago
-end
-```
-
 ## Key Generated Methods (Available in Controllers)
 
 ```ruby

